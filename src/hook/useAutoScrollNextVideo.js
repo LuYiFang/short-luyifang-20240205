@@ -2,40 +2,49 @@ import { useState, useEffect } from "react";
 
 const useAutoScrollNextVideo = (ref, videoSelector) => {
   const [videos, setVideos] = useState([]);
+  const [preIndex, setPreIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState(-1);
 
   const handleWeel = (event) => {
     if (!ref.current) return;
 
     const windowHeight = window.innerHeight;
+    const windowCenter = windowHeight / 2;
 
     const videoList = Array.from(videos);
     let currentIndex = -1;
 
     const direction = event.deltaY > 0 ? 1 : -1;
 
-    const visibleVideo = videoList.find((video, i) => {
+    let minDistance = Infinity;
+    videoList.forEach((video, i) => {
       const rect = video.getBoundingClientRect();
-
-      const isVisible =
-        (rect.top >= 0 && rect.top < windowHeight) ||
-        (rect.bottom > 0 && rect.bottom <= windowHeight);
-
-      if (isVisible) currentIndex = i;
-      return isVisible;
+      const distance = Math.min(
+        Math.abs(rect.top - windowCenter),
+        Math.abs(rect.bottom - windowCenter),
+      );
+      if (distance < minDistance) {
+        currentIndex = i;
+        minDistance = distance;
+      }
     });
 
-    if (!visibleVideo) return;
     if (currentIndex <= -1) return;
 
     let nextIndex = currentIndex + direction;
+
     if (nextIndex <= -1) nextIndex = 0;
-    if (nextIndex > videoList.length) nextIndex = videoList.length - 1;
+    if (nextIndex >= videoList.length) nextIndex = videoList.length - 1;
 
     event.preventDefault();
+
     videoList[nextIndex].scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
+
+    setPreIndex(currentIndex);
+    setNextIndex(nextIndex);
   };
 
   useEffect(() => {
@@ -44,8 +53,12 @@ const useAutoScrollNextVideo = (ref, videoSelector) => {
     setVideos(ref.current.querySelectorAll(videoSelector));
 
     ref.current.addEventListener("wheel", handleWeel);
-    return () => ref.current.removeEventListener("wheel", handleWeel);
+    return () => {
+      ref.current.removeEventListener("wheel", handleWeel);
+    };
   }, [ref.current]);
+
+  return { preIndex, nextIndex };
 };
 
 export default useAutoScrollNextVideo;
