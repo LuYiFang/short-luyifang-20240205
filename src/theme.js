@@ -5,14 +5,14 @@ export const theme = createTheme({
     MuiSvgIcon: {
       styleOverrides: {
         root: {
-          color: "black",
+          color: "#0F0F0F",
         },
       },
     },
     MuiIconButton: {
       styleOverrides: {
         root: {
-          backgroundColor: "LightGray",
+          backgroundColor: "#F4F4F4",
         },
       },
     },

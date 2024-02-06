@@ -71,3 +71,15 @@ const TextIconButton = (props) => {
     </Box>
   );
 };
+
+  const ref = useRef(null);
+  const isElementOnScreen = useOnScreen(ref);
+
+  useEffect(() => {
+    if (isElementOnScreen) {
+      setIsPlaying(true);
+      return;
+    }
+
+    setIsPlaying(false);
+  }, [isElementOnScreen]);
