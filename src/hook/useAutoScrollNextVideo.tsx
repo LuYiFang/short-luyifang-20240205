@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject } from "react";
 
-const useAutoScrollNextVideo = (ref, videoSelector) => {
-  const [videos, setVideos] = useState([]);
+const useAutoScrollNextVideo = (
+  ref: RefObject<HTMLElement>,
+  videoSelector: string,
+) => {
+  const [videos, setVideos] = useState<NodeListOf<HTMLElement>>();
   const [preIndex, setPreIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(-1);
 
-  const handleWeel = (event) => {
+  const handleWeel = (event: WheelEvent) => {
     if (!ref.current) return;
 
     const windowHeight = window.innerHeight;
     const windowCenter = windowHeight / 2;
+
+    if (!videos) return;
 
     const videoList = Array.from(videos);
     let currentIndex = -1;
@@ -54,6 +59,7 @@ const useAutoScrollNextVideo = (ref, videoSelector) => {
 
     ref.current.addEventListener("wheel", handleWeel);
     return () => {
+      if (!ref.current) return;
       ref.current.removeEventListener("wheel", handleWeel);
     };
   }, [ref.current]);
