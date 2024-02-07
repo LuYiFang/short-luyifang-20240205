@@ -7,6 +7,8 @@ export type TextButtonType = {
   clickable?: boolean;
 };
 
+export type VideoFuctionType = (url: string) => TextButtonType;
+
 export type ControlIconButtonType = {
   onClick: () => void;
   sx?: object;

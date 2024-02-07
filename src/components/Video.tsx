@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { Avatar, Box } from "@mui/material";
 import ReactPlayer from "react-player/lazy";
 
-import { videoHeight, videoWidth } from "../constants";
+import { iconSize, videoHeight, videoWidth } from "../constants";
 import { ControlIconButton, TextIconButton } from "./IconButtons";
 
 import { BiSolidCommentDetail, BiSolidShare } from "react-icons/bi";
@@ -14,9 +14,16 @@ import {
   IoMdVolumeOff,
 } from "react-icons/io";
 import { IoPauseSharp } from "react-icons/io5";
-import { VideoType } from "../types/commonTypes";
+import {
+  VideoType,
+  VideoFuctionType,
+  TextButtonType,
+} from "../types/commonTypes";
+import { fetchThumbnail } from "../utility";
 
-const buttonList = [
+type ButtonListType = Array<TextButtonType>;
+
+const buttonList: ButtonListType = [
   {
     icon: <HiThumbUp style={{ color: "#0F0F0F" }} />,
     label: "262萬",
@@ -43,18 +50,20 @@ const buttonList = [
     icon: <IoIosMore style={{ color: "#0F0F0F" }} />,
     label: "",
   },
-  { icon: <Avatar variant="rounded"></Avatar>, label: "", clickable: false },
 ];
 
 const Video: FC<VideoType> = ({ playing, index, url }) => {
   const [isPlaying, setIsPlaying] = useState(playing);
   const [isMute, setIsMute] = useState(true);
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   useEffect(() => {
     setIsPlaying(playing);
   }, [playing]);
 
-  console.log("load me", index, isPlaying);
+  useEffect(() => {
+    setThumbnailUrl(fetchThumbnail(url) || "");
+  }, [url]);
 
   return (
     <Box sx={{ display: "flex", height: videoHeight }} className="video">
@@ -102,6 +111,26 @@ const Video: FC<VideoType> = ({ playing, index, url }) => {
         {buttonList.map((item, i) => {
           return <TextIconButton key={`text-button=${i}`} item={item} />;
         })}
+
+        <Box
+          sx={{
+            marginTop: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "end",
+          }}
+        >
+          <img
+            src={thumbnailUrl}
+            alt="Video Thumbnail"
+            style={{
+              height: iconSize - 10,
+              width: iconSize - 10,
+              objectFit: "cover",
+              borderRadius: 6,
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   );
