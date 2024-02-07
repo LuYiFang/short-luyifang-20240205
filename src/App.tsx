@@ -1,11 +1,15 @@
 import "./App.css";
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, lazy, useState } from "react";
 import { shortList } from "./shortList";
 import { Container, Stack, Toolbar } from "@mui/material";
 import useAutoScrollNextVideo from "./hook/useAutoScrollNextVideo";
-import Video from "./components/Video";
+import VideoSkeleton from "./components/VideoSkeleton";
+import { LoadedVideoType } from "./types/commonTypes";
+
+const VideoComponent = lazy(() => import("./components/Video"));
 
 function App() {
+  const [loadedVideo, setLoadedVideo] = useState<LoadedVideoType>({});
   const videoListRef = useRef(null);
   const { preIndex, nextIndex } = useAutoScrollNextVideo(
     videoListRef,
@@ -23,18 +27,31 @@ function App() {
     [preIndex, nextIndex],
   );
 
+  const updateLoadedVideo = (key: number) => {
+    setLoadedVideo((pre) => ({ ...pre, [key]: true }));
+  };
+
   return (
     <div className="App" ref={videoListRef}>
       <Toolbar />
       <Container maxWidth="sm">
         <Stack spacing={3}>
           {shortList.map((url: string, i: number) => {
+            if (
+              !loadedVideo[i] &&
+              [preIndex - 1, preIndex, preIndex + 1, preIndex + 2].indexOf(i) <=
+                -1
+            ) {
+              return <VideoSkeleton key={`video-skeleton-${i}`} />;
+            }
+
             return (
-              <Video
+              <VideoComponent
                 url={url}
                 index={i}
                 key={`video-${i}`}
                 playing={playing(i)}
+                updateLoadedVideo={updateLoadedVideo}
               />
             );
           })}

@@ -22,7 +22,11 @@ const useAutoScrollNextVideo = (
     const direction = event.deltaY > 0 ? 1 : -1;
 
     let minDistance = Infinity;
-    videoList.forEach((video, i) => {
+    videoList.forEach((v, i) => {
+      if (!ref.current) return;
+      const video = ref.current.querySelector(`${videoSelector}.index-${i}`);
+      if (!video) return;
+
       const rect = video.getBoundingClientRect();
       const distance = Math.min(
         Math.abs(rect.top - windowCenter),
@@ -43,7 +47,12 @@ const useAutoScrollNextVideo = (
 
     event.preventDefault();
 
-    videoList[nextIndex].scrollIntoView({
+    const video = ref.current.querySelector(
+      `${videoSelector}.index-${nextIndex}`,
+    );
+    if (!video) return;
+
+    video.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });

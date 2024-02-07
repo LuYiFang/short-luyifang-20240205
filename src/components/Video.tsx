@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, Suspense, useEffect, useState } from "react";
 import { Avatar, Box } from "@mui/material";
 import ReactPlayer from "react-player/lazy";
 
@@ -14,12 +14,9 @@ import {
   IoMdVolumeOff,
 } from "react-icons/io";
 import { IoPauseSharp } from "react-icons/io5";
-import {
-  VideoType,
-  VideoFuctionType,
-  TextButtonType,
-} from "../types/commonTypes";
+import { VideoType, TextButtonType } from "../types/commonTypes";
 import { fetchThumbnail } from "../utility";
+import VideoSkeleton from "./VideoSkeleton";
 
 type ButtonListType = Array<TextButtonType>;
 
@@ -52,7 +49,7 @@ const buttonList: ButtonListType = [
   },
 ];
 
-const Video: FC<VideoType> = ({ playing, index, url }) => {
+const Video: FC<VideoType> = ({ playing, index, url, updateLoadedVideo }) => {
   const [isPlaying, setIsPlaying] = useState(playing);
   const [isMute, setIsMute] = useState(true);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
@@ -66,73 +63,79 @@ const Video: FC<VideoType> = ({ playing, index, url }) => {
   }, [url]);
 
   return (
-    <Box sx={{ display: "flex", height: videoHeight }} className="video">
-      <Box sx={{ position: "relative" }}>
-        <ControlIconButton
-          onClick={() => setIsPlaying(!isPlaying)}
-          sx={{
-            left: 16,
-          }}
-          isOn={isPlaying}
-          IconTrigger={IoIosPlay}
-          IconUntrigger={IoPauseSharp}
-        />
-        <ControlIconButton
-          onClick={() => setIsMute(!isMute)}
-          sx={{
-            right: 16,
-          }}
-          isOn={isMute}
-          IconTrigger={IoMdVolumeHigh}
-          IconUntrigger={IoMdVolumeOff}
-        />
-
-        <ReactPlayer
-          height={videoHeight}
-          width={videoWidth}
-          playing={isPlaying}
-          volume={1}
-          muted={isMute}
-          url={url}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-        />
-      </Box>
+    <Suspense fallback={<VideoSkeleton />}>
       <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "end",
-          px: 1,
-          minWidth: 50,
-        }}
+        sx={{ display: "flex", height: videoHeight }}
+        className={`video index-${index}`}
       >
-        {buttonList.map((item, i) => {
-          return <TextIconButton key={`text-button=${i}`} item={item} />;
-        })}
-
-        <Box
-          sx={{
-            marginTop: 2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "end",
-          }}
-        >
-          <img
-            src={thumbnailUrl}
-            alt="Video Thumbnail"
-            style={{
-              height: iconSize - 10,
-              width: iconSize - 10,
-              objectFit: "cover",
-              borderRadius: 6,
+        <Box sx={{ position: "relative" }}>
+          <ControlIconButton
+            onClick={() => setIsPlaying(!isPlaying)}
+            sx={{
+              left: 16,
             }}
+            isOn={isPlaying}
+            IconTrigger={IoIosPlay}
+            IconUntrigger={IoPauseSharp}
+          />
+          <ControlIconButton
+            onClick={() => setIsMute(!isMute)}
+            sx={{
+              right: 16,
+            }}
+            isOn={isMute}
+            IconTrigger={IoMdVolumeHigh}
+            IconUntrigger={IoMdVolumeOff}
+          />
+
+          <ReactPlayer
+            height={videoHeight}
+            width={videoWidth}
+            playing={isPlaying}
+            volume={1}
+            muted={isMute}
+            url={url}
+            onReady={() => updateLoadedVideo(index)}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
           />
         </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "end",
+            px: 1,
+            minWidth: 50,
+          }}
+        >
+          {buttonList.map((item, i) => {
+            return <TextIconButton key={`text-button=${i}`} item={item} />;
+          })}
+
+          <Box
+            sx={{
+              marginTop: 2,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "end",
+            }}
+          >
+            <img
+              src={thumbnailUrl}
+              alt="Video Thumbnail"
+              style={{
+                height: iconSize - 10,
+                width: iconSize - 10,
+                objectFit: "cover",
+                borderRadius: 6,
+              }}
+            />
+          </Box>
+        </Box>
       </Box>
-    </Box>
+    </Suspense>
   );
 };
 export default Video;

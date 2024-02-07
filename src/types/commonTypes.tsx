@@ -21,4 +21,9 @@ export type VideoType = {
   playing: boolean;
   index: number;
   url: string;
+  updateLoadedVideo: (key: number) => void;
+};
+
+export type LoadedVideoType = {
+  [key: number]: boolean;
 };
